@@ -1,33 +1,30 @@
 const { Bot } = require("grammy");
 
-const bot = new Bot(process.env.BOT_TOKEN);
-
-function getName(user) {
-  if (!user) return "Someone";
-  if (user.username) return "@" + user.username;
-  if (user.first_name) return user.first_name;
-  return "User";
+const token = process.env.BOT_TOKEN;
+if (!token) {
+  console.error("BOT_TOKEN is missing");
+  process.exit(1);
 }
 
-bot.on("message", async (ctx) => {
-  if (!ctx.message.text) return;
+const bot = new Bot(token);
 
-  const replyUser = ctx.message.reply_to_message
-    ? ctx.message.reply_to_message.from
-    : null;
+function getUserName(user) {
+  return (user.first_name || "User") + (user.last_name ? " " + user.last_name : "");
+}
 
-  if (!replyUser) return;
+bot.command("start", async (ctx) => {
+  const name = getUserName(ctx.from);
+  await ctx.reply(👋 Hello ${name}\n\nI am your AI test bot.\nSend me any message.);
+});
 
-  const name = getName(replyUser);
-  const text = ctx.message.text.toLowerCase();
+bot.on("message:text", async (ctx) => {
+  const text = ctx.message.text;
 
-  if (text.includes("who")  text.includes("ai")  text.includes("about")) {
-    await ctx.reply(
-      "🤖 AI Scan Result\n\n" +
-      name +
-      " is mysterious, smart, and probably hiding something 😏"
-    );
+  if (text.length > 4000) {
+    return ctx.reply("Message too long.");
   }
+
+  await ctx.reply(🤖 You said:\n${text});
 });
 
 bot.start();
