@@ -1,4 +1,4 @@
-import { Bot } from "grammy";
+const { Bot } = require("grammy");
 
 const bot = new Bot(process.env.BOT_TOKEN);
 
@@ -9,23 +9,26 @@ function getName(user) {
   return "User";
 }
 
-bot.on("message:text", async (ctx) => {
-  const text = ctx.message.text.toLowerCase();
-  const replyUser = ctx.message.reply_to_message?.from;
+bot.on("message", async (ctx) => {
+  if (!ctx.message.text) return;
+
+  const replyUser = ctx.message.reply_to_message
+    ? ctx.message.reply_to_message.from
+    : null;
 
   if (!replyUser) return;
 
   const name = getName(replyUser);
+  const text = ctx.message.text.toLowerCase();
 
   if (text.includes("who")  text.includes("ai")  text.includes("about")) {
     await ctx.reply(
-      "🤖 *AI Scan Complete*\n\n" +
+      "🤖 AI Scan Result\n\n" +
       name +
-      " looks like someone who thinks a lot but talks less 😏",
-      { parse_mode: "Markdown" }
+      " is mysterious, smart, and probably hiding something 😏"
     );
   }
 });
 
 bot.start();
-console.log("AI bot running...");
+console.log("Bot is running...");
